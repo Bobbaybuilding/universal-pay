@@ -1,6 +1,0 @@
-{
-  "name": "universal-pay",
-  "description": "Universal 402 payment — pay any x402 or MPP merchant on any chain via Across crosschain bridging with Tempo wallet",
-  "version": "1.0.0",
-  "userInvocable": true
-}
