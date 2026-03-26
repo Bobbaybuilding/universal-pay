@@ -1,0 +1,25 @@
+{
+  "name": "universal-pay",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Universal 402 payment skill — pay any x402 or MPP merchant on any chain via Across crosschain bridging",
+  "scripts": {
+    "wallet": "node --experimental-strip-types src/wallet.ts",
+    "balance": "node --experimental-strip-types src/balance-check.ts",
+    "pay": "node --experimental-strip-types src/demo.ts",
+    "demo:coingecko": "node --experimental-strip-types src/demo.ts 'https://pro-api.coingecko.com/api/v3/x402/simple/price?vs_currencies=usd&symbols=btc,eth,sol'",
+    "demo:firecrawl": "node --experimental-strip-types src/demo.ts 'https://firecrawl.mpp.tempo.xyz/v1/scrape' POST '{\"url\":\"https://across.to\"}'",
+    "demo:exa": "node --experimental-strip-types src/demo.ts 'https://exa.mpp.tempo.xyz/search' POST '{\"query\":\"best cross-chain bridges\",\"numResults\":3}'"
+  },
+  "dependencies": {
+    "@x402/core": "^2.8.0",
+    "@x402/evm": "^2.8.0",
+    "@x402/fetch": "^2.8.0",
+    "mppx": "^0.4.9",
+    "viem": "^2.47.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^6.0.2"
+  }
+}
