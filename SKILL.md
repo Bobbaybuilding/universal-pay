@@ -37,24 +37,35 @@ curl -fsSL https://tempo.xyz/install | bash
 
 Follow these steps in order:
 
-### Step 1 — Wallet
+### Step 1 — Create or Connect Wallet
 
-Check if Tempo wallet exists:
+Check if a Tempo wallet already exists:
 
 ```bash
-~/.tempo/bin/tempo wallet -t whoami
+cd "$SKILL_DIR" && node --experimental-strip-types src/wallet.ts
 ```
 
-If not logged in or no wallet, create one:
+If not logged in, create a new wallet:
 
 ```bash
 ~/.tempo/bin/tempo wallet login
 ```
 
 This opens a browser to sign up or log in. Once complete, show the user:
-- **Signing key address** (from the `key.address` field) — this is where USDC should be sent for crosschain payments
-- **Tempo wallet address** (from the `wallet` field) — this holds USDC on Tempo chain
-- Tell the user to **send USDC to the signing key address** on any Across-supported chain (Arbitrum, Base, Optimism, Polygon, etc.)
+
+1. **Signing key address** — where USDC should be sent for crosschain payments (displayed by `wallet.ts`)
+2. **Tempo wallet address** — holds USDC on Tempo chain for MPP payments
+3. **Tempo balance** — USDC available on Tempo
+
+Tell the user: **"Send USDC to your signing key address on any chain (Arbitrum, Base, Optimism, etc.) to fund crosschain payments."**
+
+The agent can also fund the Tempo wallet directly using:
+
+```bash
+~/.tempo/bin/tempo wallet fund
+```
+
+This opens an interactive flow to bridge USDC from any EVM chain into the Tempo wallet.
 
 ### Step 2 — Check Balance
 
