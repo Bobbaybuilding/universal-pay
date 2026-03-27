@@ -18,6 +18,14 @@ export interface FundingRequest {
   destinationAmount: bigint
 }
 
+export interface BridgeResult {
+  bridged: boolean
+  depositTxHash?: string
+  originChainId?: number
+  destinationChainId?: number
+  fee?: string
+}
+
 function getViemChain(chainId: number): Chain | undefined {
   return Object.values(chains).find((c): c is Chain => typeof c === 'object' && c !== null && 'id' in c && c.id === chainId)
 }
@@ -29,10 +37,12 @@ export function createAcrossFundingController(config: {
   const originChainIds = config.across?.originChainIds ?? DEFAULT_ORIGIN_CHAINS
   const gasBuffer = config.across?.gasBuffer ?? 0n
 
-  async function ensureDestinationFunding(req: FundingRequest): Promise<void> {
+  let lastBridge: BridgeResult = { bridged: false }
+
+  async function ensureDestinationFunding(req: FundingRequest): Promise<BridgeResult> {
     const { destinationChainId, destinationToken, destinationAmount } = req
     const destBalance = await getErc20Balance(config.account.address, destinationToken, getRpc(destinationChainId, rpcs))
-    if (destBalance >= destinationAmount) return
+    if (destBalance >= destinationAmount) { lastBridge = { bridged: false }; return lastBridge }
 
     const shortfall = destinationAmount - destBalance + gasBuffer
     const routes = await findRoutes(destinationChainId, destinationToken, config.rawFetch)
@@ -83,7 +93,9 @@ export function createAcrossFundingController(config: {
     console.log(`[universal-pay] Waiting for bridge fill...`)
     await waitForFill(depositHash, route.originChainId, config.rawFetch)
     console.log(`[universal-pay] Bridge complete`)
+    lastBridge = { bridged: true, depositTxHash: depositHash, originChainId: route.originChainId, destinationChainId, fee: quote.fees.total.amountUsd }
+    return lastBridge
   }
 
-  return { ensureDestinationFunding, rpcs }
+  return { ensureDestinationFunding, get lastBridge() { return lastBridge }, rpcs }
 }

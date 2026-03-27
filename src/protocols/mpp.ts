@@ -15,7 +15,6 @@ export function createMppAdapter(config: {
   rawFetch?: typeof globalThis.fetch
   across?: AcrossConfig
   methods?: any[]
-  polyfill?: boolean
   onLocalFunding?: (params: LocalFundingParams) => Promise<boolean>
 }) {
   const rawFetch = config.rawFetch ?? globalThis.fetch
@@ -25,7 +24,7 @@ export function createMppAdapter(config: {
   const mppx = Mppx.create({
     fetch: rawFetch,
     methods: config.methods ?? [tempo({ account, autoSwap: true })],
-    polyfill: config.polyfill ?? false,
+    polyfill: false,
     async onChallenge(challenge) {
       if (challenge.method !== 'tempo' || challenge.intent !== 'charge') return undefined
       const req = challenge.request as { amount: string; currency: string; methodDetails?: { chainId?: number } }
@@ -56,5 +55,6 @@ export function createMppAdapter(config: {
   return {
     fetch: mppx.fetch,
     isPaymentRequired: (r: Response) => r.status === 402 && !r.headers.get('PAYMENT-REQUIRED') && !!r.headers.get('WWW-Authenticate'),
+    get lastBridge() { return funding.lastBridge },
   }
 }

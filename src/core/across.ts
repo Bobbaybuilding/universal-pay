@@ -34,12 +34,21 @@ export function parseEip155ChainId(network: string): number {
   return Number(match[1])
 }
 
+const routeCache = new Map<string, { routes: AcrossRoute[]; ts: number }>()
+const ROUTE_CACHE_TTL = 300_000 // 5 min
+
 export async function findRoutes(destChainId: number, outputToken: string, f = globalThis.fetch): Promise<AcrossRoute[]> {
+  const key = `${destChainId}:${outputToken.toLowerCase()}`
+  const cached = routeCache.get(key)
+  if (cached && Date.now() - cached.ts < ROUTE_CACHE_TTL) return cached.routes
+
   const url = new URL(`${ACROSS_API}/available-routes`)
   url.searchParams.set('destinationChainId', destChainId.toString())
   const res = await f(url.toString())
   if (!res.ok) return []
-  return ((await res.json()) as AcrossRoute[]).filter(r => r.destinationToken.toLowerCase() === outputToken.toLowerCase())
+  const routes = ((await res.json()) as AcrossRoute[]).filter(r => r.destinationToken.toLowerCase() === outputToken.toLowerCase())
+  routeCache.set(key, { routes, ts: Date.now() })
+  return routes
 }
 
 export async function getQuote(params: {

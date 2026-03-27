@@ -35,8 +35,8 @@ export function createUniversalFetchWithAcross(config: UniversalFetchConfig) {
   const account = privateKeyToAccount(config.privateKey)
   let lastProtocol: UniversalProtocol | null = null
 
-  const x402 = createX402Adapter({ privateKey: config.privateKey, across: config.across, rawFetch, polyfill: false })
-  const mpp = createMppAdapter({ privateKey: config.privateKey, across: config.across, rawFetch, methods: config.mpp?.methods, polyfill: false })
+  const x402 = createX402Adapter({ privateKey: config.privateKey, across: config.across, rawFetch })
+  const mpp = createMppAdapter({ privateKey: config.privateKey, across: config.across, rawFetch, methods: config.mpp?.methods })
 
   async function fetchWithPayment(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
     const req = await toReplayableRequest(input, init)
@@ -61,6 +61,7 @@ export function createUniversalFetchWithAcross(config: UniversalFetchConfig) {
     account,
     fetch: fetchWithPayment,
     get lastProtocol() { return lastProtocol },
+    get lastBridge() { return x402.lastBridge?.bridged ? x402.lastBridge : mpp.lastBridge },
     rawFetch,
   }
 }

@@ -10,7 +10,6 @@ export function createX402Adapter(config: {
   privateKey: `0x${string}`
   rawFetch?: typeof globalThis.fetch
   across?: AcrossConfig
-  polyfill?: boolean
 }) {
   const rawFetch = config.rawFetch ?? globalThis.fetch
   const account = privateKeyToAccount(config.privateKey)
@@ -35,5 +34,6 @@ export function createX402Adapter(config: {
   return {
     fetch: wrapFetchWithPayment(rawFetch, new x402HTTPClient(client)),
     isPaymentRequired: (r: Response) => r.status === 402 && r.headers.get('PAYMENT-REQUIRED') !== null,
+    get lastBridge() { return funding.lastBridge },
   }
 }
