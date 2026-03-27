@@ -1,5 +1,5 @@
 import { createPublicClient, erc20Abi, http, type Address } from 'viem'
-import { DEFAULT_RPCS, type AcrossRoute } from './across.ts'
+import { DEFAULT_RPCS, type AcrossRoute } from './across.js'
 
 export function getRpc(chainId: number, rpcs: Record<number, string> = {}): string {
   return rpcs[chainId] ?? DEFAULT_RPCS[chainId] ?? `https://lb.drpc.org/ogrpc?network=${chainId}`
@@ -8,7 +8,14 @@ export function getRpc(chainId: number, rpcs: Record<number, string> = {}): stri
 export async function getErc20Balance(address: string, token: string, rpcUrl: string): Promise<bigint> {
   try {
     return await createPublicClient({ transport: http(rpcUrl) }).readContract({ address: token as Address, abi: erc20Abi, functionName: 'balanceOf', args: [address as Address] })
-  } catch { return 0n }
+  } catch (e) {
+    // Distinguish "couldn't check" from "zero balance" — zero is returned only on RPC failure
+    const msg = e instanceof Error ? e.message : String(e)
+    if (msg.includes('403') || msg.includes('timeout') || msg.includes('ECONNREFUSED')) {
+      console.warn(`[universal-pay] Balance check failed for ${rpcUrl}: ${msg.slice(0, 100)}`)
+    }
+    return 0n
+  }
 }
 
 export async function getFundedRouteBalances(address: string, routes: AcrossRoute[], rpcs: Record<number, string> = {}) {

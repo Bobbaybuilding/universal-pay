@@ -1,8 +1,8 @@
 import { privateKeyToAccount } from 'viem/accounts'
 
-import { type AcrossConfig, type UniversalProtocol } from './core/funding.ts'
-import { createMppAdapter } from './protocols/mpp.ts'
-import { createX402Adapter } from './protocols/x402.ts'
+import { type AcrossConfig, type UniversalProtocol } from './core/funding.js'
+import { createMppAdapter } from './protocols/mpp.js'
+import { createX402Adapter } from './protocols/x402.js'
 
 export interface UniversalFetchConfig {
   privateKey: `0x${string}`

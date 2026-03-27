@@ -1,6 +1,7 @@
-import { createPublicClient, createWalletClient, http } from 'viem'
-import { DEFAULT_ORIGIN_CHAINS, DEFAULT_RPCS, getQuote, findRoutes, type AcrossRoute, waitForFill } from './across.ts'
-import { getErc20Balance, getFundedRouteBalances, getRpc } from './balance.ts'
+import { createPublicClient, createWalletClient, http, type Chain } from 'viem'
+import * as chains from 'viem/chains'
+import { DEFAULT_ORIGIN_CHAINS, DEFAULT_RPCS, getQuote, findRoutes, type AcrossRoute, waitForFill } from './across.js'
+import { getErc20Balance, getFundedRouteBalances, getRpc } from './balance.js'
 
 export type UniversalProtocol = 'mpp' | 'x402' | 'unknown'
 
@@ -15,6 +16,10 @@ export interface FundingRequest {
   destinationChainId: number
   destinationToken: string
   destinationAmount: bigint
+}
+
+function getViemChain(chainId: number): Chain | undefined {
+  return Object.values(chains).find((c): c is Chain => typeof c === 'object' && c !== null && 'id' in c && c.id === chainId)
 }
 
 export function createAcrossFundingController(config: {
@@ -51,8 +56,10 @@ export function createAcrossFundingController(config: {
     if (quoted.length === 0) throw new Error('No origin chain has sufficient balance to cover bridge amount + fees')
     const { route, quote } = quoted[0]
 
-    const wallet = createWalletClient({ account: config.account, transport: http(getRpc(route.originChainId, rpcs)) })
-    const pub = createPublicClient({ transport: http(getRpc(route.originChainId, rpcs)) })
+    const viemChain = getViemChain(route.originChainId)
+    const rpcUrl = getRpc(route.originChainId, rpcs)
+    const wallet = createWalletClient({ account: config.account, chain: viemChain, transport: http(rpcUrl) })
+    const pub = createPublicClient({ chain: viemChain, transport: http(rpcUrl) })
 
     const ethBalance = await pub.getBalance({ address: config.account.address })
     if (ethBalance === 0n) {
@@ -60,12 +67,11 @@ export function createAcrossFundingController(config: {
     }
 
     for (const tx of quote.approvalTxns ?? []) {
-      const hash = await wallet.sendTransaction({ account: config.account, chain: undefined, to: tx.to as `0x${string}`, data: tx.data as `0x${string}` })
+      const hash = await wallet.sendTransaction({ to: tx.to as `0x${string}`, data: tx.data as `0x${string}` })
       await pub.waitForTransactionReceipt({ hash })
     }
 
     const depositHash = await wallet.sendTransaction({
-      account: config.account, chain: undefined,
       to: quote.swapTx.to as `0x${string}`, data: quote.swapTx.data as `0x${string}`,
     })
     await pub.waitForTransactionReceipt({ hash: depositHash })

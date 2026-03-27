@@ -3,8 +3,8 @@ import { ExactEvmScheme, toClientEvmSigner } from '@x402/evm'
 import { wrapFetchWithPayment } from '@x402/fetch'
 import { privateKeyToAccount } from 'viem/accounts'
 
-import { parseEip155ChainId } from '../core/across.ts'
-import { createAcrossFundingController, type AcrossConfig } from '../core/funding.ts'
+import { parseEip155ChainId } from '../core/across.js'
+import { createAcrossFundingController, type AcrossConfig } from '../core/funding.js'
 
 export function createX402Adapter(config: {
   privateKey: `0x${string}`

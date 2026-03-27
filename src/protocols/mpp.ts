@@ -1,7 +1,7 @@
 import { Mppx, tempo } from 'mppx/client'
 import { privateKeyToAccount } from 'viem/accounts'
 
-import { createAcrossFundingController, type AcrossConfig } from '../core/funding.ts'
+import { createAcrossFundingController, type AcrossConfig } from '../core/funding.js'
 
 export interface LocalFundingParams {
   chainId: number
