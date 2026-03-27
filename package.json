@@ -1,6 +1,6 @@
 {
   "name": "universal-pay",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Pay any HTTP 402 merchant on any chain. Auto-detects x402 or MPP, bridges funds via Across.",
   "main": "dist/index.js",

@@ -17,13 +17,13 @@ curl -fsSL https://tempo.xyz/install | bash
 ~/.tempo/bin/tempo wallet login
 ```
 
-Once logged in, get the private key:
+Once logged in, set the private key as an environment variable:
 
 ```bash
-~/.tempo/bin/tempo wallet -j whoami
+export UNIVERSAL_PAY_KEY=$(~/.tempo/bin/tempo wallet -j whoami | node -e "process.stdin.on('data',d=>console.log(JSON.parse(d).key.key))")
 ```
 
-The private key is in the `key.key` field. The signing key address is in `key.address` — fund it with USDC + ETH on any chain (Arbitrum is cheapest).
+The signing key address is in `key.address` — fund it with USDC + ETH on any chain (Arbitrum is cheapest).
 
 ## Usage
 
@@ -31,7 +31,7 @@ The private key is in the `key.key` field. The signing key address is in `key.ad
 import { createUniversalFetchWithAcross } from 'universal-pay'
 
 const client = createUniversalFetchWithAcross({
-  privateKey: '<key.key from tempo wallet>',
+  privateKey: process.env.UNIVERSAL_PAY_KEY as `0x${string}`,
 })
 
 const response = await client.fetch('<URL>')

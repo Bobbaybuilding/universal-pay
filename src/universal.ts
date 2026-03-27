@@ -55,7 +55,7 @@ export function createUniversalFetchWithAcross(config: UniversalFetchConfig) {
     return probe
   }
 
-  if (config.polyfill ?? true) globalThis.fetch = fetchWithPayment
+  if (config.polyfill === true) globalThis.fetch = fetchWithPayment
 
   return {
     account,

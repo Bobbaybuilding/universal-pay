@@ -14,7 +14,7 @@ npm install universal-pay
 import { createUniversalFetchWithAcross } from 'universal-pay'
 
 const client = createUniversalFetchWithAcross({
-  privateKey: '0x...',
+  privateKey: process.env.UNIVERSAL_PAY_KEY as `0x${string}`,
 })
 
 // Pays automatically — detects protocol, bridges if needed
@@ -32,12 +32,11 @@ const response = await client.fetch('https://merchant.example.com')
 
 ```typescript
 createUniversalFetchWithAcross({
-  privateKey: '0x...',              // required
-  polyfill: true,                   // replace globalThis.fetch (default: true)
+  privateKey: process.env.UNIVERSAL_PAY_KEY as `0x${string}`,  // required
+  polyfill: false,                  // replace globalThis.fetch (default: false)
   across: {
     originChainIds: [42161, 8453],  // chains to scan for funds
-    gasBuffer: 10_000n,             // extra wei bridged above shortfall
-    rpcs: { 42161: 'https://...' },// custom RPCs
+    rpcs: { 42161: 'https://...' }, // custom RPCs
   },
 })
 ```
