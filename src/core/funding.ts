@@ -40,6 +40,8 @@ export function createAcrossFundingController(config: {
     const funded = await getFundedRouteBalances(config.account.address, candidates, rpcs)
     if (funded.length === 0) throw new Error(`No funded origin chain found. Send USDC to ${config.account.address} on any Across-supported chain.`)
 
+    console.log(`[universal-pay] Bridging needed: scanning ${funded.length} funded chain(s)...`)
+
     const quoted = (await Promise.allSettled(
       funded.map(async c => {
         const q = await getQuote({
@@ -55,6 +57,8 @@ export function createAcrossFundingController(config: {
 
     if (quoted.length === 0) throw new Error('No origin chain has sufficient balance to cover bridge amount + fees')
     const { route, quote } = quoted[0]
+
+    console.log(`[universal-pay] Bridge: chain ${route.originChainId} -> chain ${destinationChainId} (fee: $${quote.fees.total.amountUsd})`)
 
     const viemChain = getViemChain(route.originChainId)
     const rpcUrl = getRpc(route.originChainId, rpcs)
@@ -74,8 +78,11 @@ export function createAcrossFundingController(config: {
     const depositHash = await wallet.sendTransaction({
       to: quote.swapTx.to as `0x${string}`, data: quote.swapTx.data as `0x${string}`,
     })
+    console.log(`[universal-pay] Deposit sent: ${depositHash}`)
     await pub.waitForTransactionReceipt({ hash: depositHash })
+    console.log(`[universal-pay] Waiting for bridge fill...`)
     await waitForFill(depositHash, route.originChainId, config.rawFetch)
+    console.log(`[universal-pay] Bridge complete`)
   }
 
   return { ensureDestinationFunding, rpcs }
