@@ -3,7 +3,7 @@ export const ACROSS_API = 'https://app.across.to/api'
 export const DEFAULT_RPCS: Record<number, string> = {
   1: 'https://eth.llamarpc.com', 10: 'https://mainnet.optimism.io',
   56: 'https://bsc-dataseed.binance.org', 130: 'https://mainnet.unichain.org',
-  137: 'https://polygon-rpc.com', 143: 'https://rpc.monad.xyz',
+  143: 'https://rpc.monad.xyz',
   232: 'https://rpc.lens.xyz', 324: 'https://mainnet.era.zksync.io',
   480: 'https://mainnet.worldchain.io', 999: 'https://rpc.hyperliquid.xyz/evm',
   1135: 'https://rpc.api.lisk.com', 1868: 'https://rpc.soneium.org',

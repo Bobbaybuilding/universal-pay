@@ -27,7 +27,7 @@ export function createAcrossFundingController(config: {
 }) {
   const rpcs = { ...DEFAULT_RPCS, ...config.across?.rpcs }
   const originChainIds = config.across?.originChainIds ?? DEFAULT_ORIGIN_CHAINS
-  const gasBuffer = config.across?.gasBuffer ?? 10_000n
+  const gasBuffer = config.across?.gasBuffer ?? 0n
 
   async function ensureDestinationFunding(req: FundingRequest): Promise<void> {
     const { destinationChainId, destinationToken, destinationAmount } = req
