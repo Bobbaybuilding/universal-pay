@@ -4,40 +4,41 @@ Pay any HTTP 402 API — x402 or MPP — on any chain. Across bridges funds auto
 
 ## Setup
 
-### 1. Install package (if not already installed)
+### 1. Install package
 
-Check: `node -e "require.resolve('universal-pay')" 2>/dev/null && echo installed || echo "not installed"`
-
-If not installed:
 ```bash
 npm install universal-pay
 ```
 
-### 2. Wallet (if UNIVERSAL_PAY_KEY not already set)
+### 2. Tempo wallet
 
-If `echo $UNIVERSAL_PAY_KEY` prints a key starting with `0x`, skip this step.
+Check if logged in:
+```bash
+~/.tempo/bin/tempo wallet -j whoami 2>/dev/null && echo "logged in" || echo "not logged in"
+```
 
-Install Tempo CLI and get your signing key:
+If not logged in, install Tempo CLI and create a wallet:
 ```bash
 curl -fsSL https://tempo.xyz/install | bash
 ~/.tempo/bin/tempo wallet login
-export UNIVERSAL_PAY_KEY=$(~/.tempo/bin/tempo wallet -j whoami | python3 -c "import json,sys; print(json.load(sys.stdin)['key']['key'])")
 ```
 
-Fund the signing key address with USDC + ETH on any chain (Arbitrum is cheapest). Get the address:
+Get the signing key and address:
 ```bash
-~/.tempo/bin/tempo wallet -j whoami | python3 -c "import json,sys; print(json.load(sys.stdin)['key']['address'])"
+~/.tempo/bin/tempo wallet -j whoami | python3 -c "import json,sys; d=json.load(sys.stdin); print('Key:', d['key']['key']); print('Address:', d['key']['address'])"
 ```
+
+Fund the signing key address with USDC + ETH on any chain (Arbitrum is cheapest).
 
 ## Usage
 
 Save as `pay.mjs`:
 ```js
+import { execSync } from 'child_process'
 import { createUniversalFetchWithAcross } from 'universal-pay'
 
-const client = createUniversalFetchWithAcross({
-  privateKey: process.env.UNIVERSAL_PAY_KEY,
-})
+const tempo = JSON.parse(execSync('~/.tempo/bin/tempo wallet -j whoami', { encoding: 'utf-8' }))
+const client = createUniversalFetchWithAcross({ privateKey: tempo.key.key })
 
 const response = await client.fetch('<URL>')
 const text = await response.text()
